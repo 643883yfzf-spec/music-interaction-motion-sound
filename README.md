@@ -10,8 +10,10 @@ Features
 - Sound presets: Includes two synthesized sounds: Electric Piano and Horn.
 - Performance controls: Adjustable scale, volume, and audio toggles.
 - Multilingual interface: English by default, with Simplified and Traditional Chinese options.
+
 How to Use
-Launch the Website https://643883yfzf-spec.github.io/music-interaction-motion-sound/
+Launch the Website 
+https://643883yfzf-spec.github.io/music-interaction-motion-sound/
 
 Video Mode
 1. Select Video tracking.
