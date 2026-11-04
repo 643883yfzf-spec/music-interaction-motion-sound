@@ -1,24 +1,40 @@
-# 动势谱 / Motion Score
+Motion Score
+Motion Score is an interactive web project that transforms visual movement into music.
 
-四视频声音交互与摄像头指尖演奏原型。
+The project is inspired by moments of impact, such as shattering glass, basketball dunks, and speeding race cars. I wanted to turn movement into a form of musical performance—allowing the position, speed, and changes of objects to be heard as well as seen.
 
-## 在线部署
-
-仓库名建议：music-interaction-motion-sound。
-代码上传至 main 后，在 Settings → Pages → Build and deployment → Source 中选择 GitHub Actions。
-然后在 Actions 中运行 Deploy GitHub Pages；成功后，Pages 和运行记录会显示在线网址。
-工作流发布 dist 目录，不需要 Node.js 或 npm 构建。
-
-## 本地预览
-
-安装 Python 3 后运行：python serve.py，然后访问 http://localhost:8765。
-
-## 文件
-
-- dist/：网站 HTML、CSS、JavaScript、四段视频、音色及本地手部识别模型。
-- serve.py：本地静态服务器。
-- .github/workflows/pages.yml：GitHub Pages 自动部署。
-
-摄像头需要 HTTPS 或 localhost，并由访客在浏览器允许权限。音频需要点击开始按钮。
-原包未包含 package.json 或单独的 src 工程，本仓库保留原包提供的应用代码。
-第三方许可见 dist/vendor/mediapipe/LICENSE.txt；发布者需具有所用视频及音色素材的发布权。
+The current version supports video object tracking and live fingertip performance through a webcam.
+Features
+- Video-to-music interaction: Tracks larger fragments in a glass-shattering video, displaying object IDs, bounding boxes, and motion trails.
+- Fingertip performance: Detects up to two hands through a webcam, with each fingertip triggering notes independently.
+- Motion mapping: Vertical position controls pitch, horizontal position controls stereo panning, and movement speed affects note velocity.
+- Sound presets: Includes two synthesized sounds: Electric Piano and Horn.
+- Performance controls: Adjustable scale, volume, and audio toggles.
+- Multilingual interface: English by default, with Simplified and Traditional Chinese options.
+How to Use
+Launch the Website
+After downloading the project, start a local server inside the dist folder containing index.html. For example, with Python installed, run:
+cd dist
+python -m http.server 8766 --bind 127.0.0.1
+Then open the following address in your browser:
+http://localhost:8766/
+Video Mode
+1. Select Video tracking.
+2. Click Start playing to play the sample video.
+3. Observe the fragment tracking boxes and pitch bands on the right.
+4. Choose a sound preset, scale, and volume under Mapping controls.
+The glass video uses a preconfigured large-fragment tracking method. Visual feedback indicates which fragments are triggering sounds.
+Camera Mode
+1. Select Camera · Finger play.
+2. Click Start camera & play and allow camera access.
+3. Keep your entire hand and fingers within the frame.
+4. Move your fingertips to perform: moving upward raises the pitch, moving horizontally changes stereo panning, and faster movement increases note velocity.
+Click Stop camera or switch back to video mode to turn off the camera. Frames are processed locally without recording or uploading. The microphone is not used.
+Technology
+The interface is built with HTML, CSS, and JavaScript. Canvas is used to analyze video frames, MediaPipe detects hand landmarks, and the Web Audio API generates sound.
+Future Development
+- Allow users to upload their own videos.
+- Automatically identify visual elements or let users select the objects they want to track.
+- Provide detection methods and musical mappings suited to different types of footage.
+- Add editable musical phrases, sounds, and presets to support richer compositions.
+My goal is for Motion Score to become an intuitive creative tool that turns everyday movements and visual moments into starting points for music.
