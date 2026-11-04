@@ -1,4 +1,3 @@
-Motion Score
 Motion Score is an interactive web project that transforms visual movement into music.
 
 The project is inspired by moments of impact, such as shattering glass, basketball dunks, and speeding race cars. I wanted to turn movement into a form of musical performance—allowing the position, speed, and changes of objects to be heard as well as seen.
