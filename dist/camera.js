@@ -1,3 +1,4 @@
+import {acquireCamera} from './camera-access.mjs';
 const $=id=>document.getElementById(id),bridge=window.motionAudioBridge;
 const view=$('cameraVideo'),canvas=$('cameraOverlay'),ctx=canvas.getContext('2d'),motion=new HandMotion();
 const connections=[[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[0,17],[17,18],[18,19],[19,20]];
@@ -23,19 +24,21 @@ async function refreshDevices(){
 }
 async function start(){
  if(!selected||running||$('cameraStart').disabled)return;
+ let phase='audio';
  const token=++request;$('cameraStart').disabled=true;$('cameraStop').disabled=false;$('cameraDevice').disabled=true;notesPlayed=0;$('cameraNoteCount').textContent='0';clearHands();
  try{
   if(!isSecureContext||!navigator.mediaDevices?.getUserMedia)throw Error('请通过 http://localhost:8765 或 HTTPS 打开页面，并使用支持摄像头的浏览器。');
   await bridge.init();if(token!==request)return;
+  phase='camera';
   status('正在请求摄像头权限，请在浏览器中允许摄像头访问…');
   const id=$('cameraDevice').value;
-  const acquired=await navigator.mediaDevices.getUserMedia({audio:false,video:{width:{ideal:640},height:{ideal:480},frameRate:{ideal:30,max:30},...(id?{deviceId:{exact:id}}:{})}});
+  const acquired=await acquireCamera({mediaDevices:navigator.mediaDevices,deviceId:id,isCurrent:()=>token===request,onRetry:()=>status('Retrying camera with basic settings…')});
   if(token!==request){acquired.getTracks().forEach(t=>t.stop());return;}stream=acquired;
-  view.srcObject=stream;await view.play();if(token!==request)return;
+  phase='preview';view.muted=true;view.autoplay=true;view.srcObject=stream;await view.play();if(token!==request)return;
   canvas.width=view.videoWidth||640;canvas.height=view.videoHeight||480;view.parentElement.style.aspectRatio=canvas.width+'/'+canvas.height;
   $('cameraPlaceholder').hidden=true;$('cameraDeviceName').textContent=stream.getVideoTracks()[0].label||'Web Camera';refreshDevices();
   stream.getVideoTracks()[0].addEventListener('ended',()=>{if(token===request)stop('摄像头已断开，请检查设备连接后重新开启。');});
-  status('画面已连接，正在载入本地手部识别模型…');
+  phase='model';status('画面已连接，正在载入本地手部识别模型…');
   worker=new Worker(new URL('./hand-worker.js',import.meta.url));
   await new Promise((resolve,reject)=>{
    rejectLoading=reject;loadTimer=setTimeout(()=>reject(Error('手部模型载入超时，请检查 vendor 文件是否完整。')),45000);
@@ -50,7 +53,7 @@ async function start(){
   if(token!==request)return;running=true;fpsFrames=0;fpsTime=performance.now();lastSent=0;lastVideoTime=-1;lastResponse=performance.now();
   status('已开启 · 五个手指分别演奏，上下移动指尖改变音高。');raf=requestAnimationFrame(loop);
   watchdog=setInterval(()=>{if(running&&performance.now()-lastResponse>8000)stop('摄像头或识别暂时无响应，请重新开启。');},1000);
- }catch(e){if(token!==request)return;const errors={NotAllowedError:'摄像头权限未允许。请在浏览器地址栏的网站权限中允许摄像头后重试。',NotFoundError:'没有发现摄像头，请确认 Web Camera 已连接。',NotReadableError:'摄像头可能正被其他程序占用，请关闭占用程序后重试。',OverconstrainedError:'所选摄像头不可用，请刷新设备列表或改用系统默认摄像头。'};stop(errors[e.name]||'启动失败：'+e.message);}
+ }catch(e){if(token!==request)return;const errors={NotAllowedError:'摄像头权限未允许。请在浏览器地址栏的网站权限中允许摄像头后重试。',NotFoundError:'没有发现摄像头，请确认 Web Camera 已连接。',NotReadableError:'Browser could not read the camera. Close other camera apps; check browser/Windows access or select another camera.',OverconstrainedError:'所选摄像头不可用，请刷新设备列表或改用系统默认摄像头。'};console.error('Camera startup failed',{phase,name:e.name,message:e.message});stop((errors[e.name]||'Camera startup failed.')+' ['+phase+' / '+e.name+'] '+e.message);}
 }
 async function loop(now){
  if(!running)return;raf=requestAnimationFrame(loop);
