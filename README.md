@@ -11,18 +11,14 @@ Features
 - Performance controls: Adjustable scale, volume, and audio toggles.
 - Multilingual interface: English by default, with Simplified and Traditional Chinese options.
 How to Use
-Launch the Website
-After downloading the project, start a local server inside the dist folder containing index.html. For example, with Python installed, run:
-cd dist
-python -m http.server 8766 --bind 127.0.0.1
-Then open the following address in your browser:
-http://localhost:8766/
+Launch the Website https://643883yfzf-spec.github.io/music-interaction-motion-sound/
+
 Video Mode
 1. Select Video tracking.
 2. Click Start playing to play the sample video.
 3. Observe the fragment tracking boxes and pitch bands on the right.
 4. Choose a sound preset, scale, and volume under Mapping controls.
-The glass video uses a preconfigured large-fragment tracking method. Visual feedback indicates which fragments are triggering sounds.
+
 Camera Mode
 1. Select Camera · Finger play.
 2. Click Start camera & play and allow camera access.
