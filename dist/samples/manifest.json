@@ -1,0 +1,47 @@
+[
+  {
+    "file": "C1_S.wav",
+    "midi": 24,
+    "original": "C1 S - 31.wav"
+  },
+  {
+    "file": "E1_S.wav",
+    "midi": 28,
+    "original": "E1 S - 30.wav"
+  },
+  {
+    "file": "G1_S.wav",
+    "midi": 31,
+    "original": "G1 S - 29.wav"
+  },
+  {
+    "file": "C2_S.wav",
+    "midi": 36,
+    "original": "C2 S - 28.wav"
+  },
+  {
+    "file": "E2_S.wav",
+    "midi": 40,
+    "original": "E2 S - 27.wav"
+  },
+  {
+    "file": "C3_S.wav",
+    "midi": 48,
+    "original": "C3 S - 25.wav"
+  },
+  {
+    "file": "E3_S.wav",
+    "midi": 52,
+    "original": "E3 S - 24.wav"
+  },
+  {
+    "file": "B3_S.wav",
+    "midi": 59,
+    "original": "B3 S - 23.wav"
+  },
+  {
+    "file": "D4_S.wav",
+    "midi": 62,
+    "original": "D4 S - 22.wav"
+  }
+]
