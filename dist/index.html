@@ -1,34 +1,35 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>动势谱 · 视频声音实验室</title><link rel="stylesheet" href="style.css"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>动势谱 · 视频声音实验室</title><link rel="stylesheet" href="style.css?v=20261121"></head>
 <body>
 <header><a class="brand" href="#"><span class="mark">◧</span> 动势谱 <small>MOTION / SCORE</small></a><span class="edition">视频声音实验室 <b>04 / FINGERS</b></span><label class="language-picker" data-no-i18n>Language <select id="languageSelect" aria-label="Language"><option value="en">English</option><option value="zh-CN">简体中文</option><option value="zh-TW">繁體中文</option></select></label></header>
 <main>
 <section class="intro"><div><div class="eyebrow">IMAGE → MOVEMENT → SOUND</div><h1>让每一次运动，<em>成为声音。</em></h1><p>跟随碎片、烟花、篮球与浪花，让运动成为声音。</p></div><div class="localbadge"><i></i> 本地分析 · 原视频静音</div></section>
-<nav class="source-tabs" aria-label="功能选项"><button id="videoTab" class="selected" aria-pressed="true">01 视频识别</button><button id="cameraTab" aria-pressed="false">02 摄像头 · 指尖演奏</button></nav>
+<nav class="source-tabs" aria-label="功能选项"><button id="videoTab" class="selected" aria-pressed="true">01 视频识别</button><button id="cameraTab" aria-pressed="false">02 摄像头 · 和弦演奏</button></nav>
 <section id="cameraPanel" class="camera-panel" hidden>
  <div class="camera-main">
   <div class="panelhead"><span><span class="dot"></span> 实时摄像头 <small id="cameraDeviceName">尚未启动</small></span><span>最多识别双手</span></div>
-  <div class="camera-stage"><video id="cameraVideo" muted playsinline></video><canvas id="cameraOverlay"></canvas><div id="cameraPlaceholder">举起手，让动作成为声音。<small>点击“开启摄像头”，允许访问你的 Web Camera。</small></div><div class="camera-corner">HAND LANDMARKS <b id="cameraFPS">0 fps</b></div></div>
+  <div class="camera-stage"><video id="cameraVideo" muted playsinline></video><canvas id="cameraOverlay"></canvas><div class="remix-zones" aria-hidden="true"><div class="remix-left"><b>左手 · 选和弦</b><span>左右移动选择 · 拇指与食指捏合触发</span></div><div class="remix-gap"></div><div class="remix-right"><b>右手 · 塑造声音</b><span>↑ 音量增大　→ 声音更明亮</span></div></div><div id="cameraPlaceholder">双手分区，让和弦流动。<small>左手放左侧，右手放右侧。先张开左手，再捏合拇指与食指。</small></div><div class="camera-corner">HAND LANDMARKS <b id="cameraFPS">0 fps</b></div></div>
+  <div class="chord-deck"><div class="chord-deck-heading"><span>左手和弦库</span><span id="chordSelection">待触发 · 和弦 1</span></div><div id="chordCards" class="chord-cards" aria-label="和弦库"></div><div class="chord-deck-foot"><span>捏合触发选中和弦；点击下方卡片以100%音量试听。</span><button id="chordStop">淡出和弦</button></div></div>
   <div class="camera-buttons"><button id="cameraStart" class="primary">开启摄像头并演奏</button><button id="cameraStop" disabled>关闭摄像头</button><label><input id="cameraMirror" type="checkbox" checked> 镜像预览</label></div>
   <p id="cameraStatus" role="status" aria-live="polite">摄像头尚未开启；画面仅在本机分析，不录制、不上传，也不使用麦克风。</p>
-  <div class="camera-metrics"><div>已识别手部 <b id="cameraHandCount">0 / 2</b></div><div>本次音符 <b id="cameraNoteCount">0</b></div><div>最近音符 <b id="cameraLastNote">—</b></div></div>
+  <div class="camera-metrics"><div>已识别手部 <b id="cameraHandCount">0 / 2</b></div><div>触发和弦 <b id="cameraNoteCount">0</b></div><div>正在播放 <b id="cameraLastNote">—</b></div></div>
   <div id="cameraHandList" class="targetlist">等待手部进入画面…</div>
  </div>
- <aside class="camera-settings"><h2>指尖演奏设置</h2><label class="field">摄像头<select id="cameraDevice"><option value="">系统默认摄像头</option></select></label><button id="cameraRefresh" class="textbutton">刷新设备列表</button>
- <label class="field">音色<select id="cameraTone"><option value="glass">电钢琴</option><option value="brass">号</option><option value="harp">竖琴</option></select></label>
- <label class="field">音阶<select id="cameraScale"><option value="minor">C 小调五声音阶</option><option value="major">C 大调五声音阶</option><option value="chromatic">半音阶</option></select></label>
- <label class="sliderlabel">演奏间隔 <output id="cameraCooldownOut">220 ms</output><input id="cameraCooldown" type="range" min="100" max="800" step="10" value="220"></label>
- <label class="sliderlabel">音量 <output id="cameraVolumeOut">35%</output><input id="cameraVolume" type="range" min="0" max="100" value="35"></label>
- <label class="trailtoggle"><input id="cameraSound" type="checkbox" checked> 网页发声</label>
- <div class="camera-guide"><h3>怎样演奏</h3><p>五个指尖独立触发音符：上下改变音高，左右改变声像，速度改变力度；发声时对应指尖闪白。</p><p>保持手掌和手指完整入镜。静止时不持续重复发声，离开画面后停止触发。</p><p>每只手的拇指、食指、中指、无名指和小指均可演奏。骨架辅助定位，指尖各自显示轨迹和音符。</p><p>切换回视频模式会自动关闭摄像头。</p></div>
+ <aside class="camera-settings"><h2>和弦演奏设置</h2><label class="field">摄像头<select id="cameraDevice"><option value="">系统默认摄像头</option></select></label><button id="cameraRefresh" class="textbutton">刷新设备列表</button>
+<div class="remix-readout"><span>右手音量</span><b id="remixVolumeValue">50%</b><div class="remix-meter"><i id="remixVolumeMeter"></i></div></div>
+<div class="remix-readout"><span>右手滤波 · 闷 → 亮</span><b id="remixFilterValue">2.8 kHz</b><div class="remix-meter"><i id="remixFilterMeter"></i></div></div>
+<label class="sliderlabel">和弦总音量 <output id="cameraVolumeOut">65%</output><input id="cameraVolume" type="range" min="0" max="100" value="65"></label>
+<label class="sliderlabel">触发间隔 <output id="cameraCooldownOut">0 ms</output><input id="cameraCooldown" type="range" min="0" max="1000" step="50" value="0"></label>
+<label class="trailtoggle"><input id="cameraSound" type="checkbox" checked> 和弦发声</label>
+<div class="camera-guide"><h3>怎样演奏</h3><p>左手在左区横向选择和弦，拇指与食指捏合触发一次；松开后可以再次触发。捏住时移动只切换选择。</p><p>右手在右区上下调节音量，左右调节双重低通滤波，从低沉闷厚到明亮通透。两只手保持分开，中间缓冲区暂停更新控制。</p><p>手进入后会锁定所属操作区。两手交叉或遮挡时暂停触发；右手离开后，音量平滑回到50%。</p><p>最多保留两个和弦自然衰减，触发第三个时最早的淡出。重复触发同一和弦会重新弹奏。青色卡片表示正在发声，右手统一控制手势演奏声部。</p><p>切换回视频模式会自动关闭摄像头。</p></div>
  </aside>
 </section>
 <div class="workspace" id="videoWorkspace">
 <section class="stagepanel">
 <nav class="sample-tabs" aria-label="视频素材"><button id="glassSample" class="selected" aria-pressed="true">01 玻璃碎裂</button><button id="fireworksSample" aria-pressed="false">02 烟花光点</button><button id="basketballSample" aria-pressed="false">03 篮球跟踪</button><button id="oceanSample" aria-pressed="false">04 海浪浪花</button></nav>
 <div class="panelhead"><div><span class="dot"></span> 视频输入 <span id="filename">素材1 · 玻璃碎裂</span></div><label class="upload">＋ 更换视频<input id="file" type="file" accept="video/*"></label></div>
-<div class="stage" id="stage"><video id="video" src="sample.mp4" muted playsinline preload="auto"></video><canvas id="overlay"></canvas><div class="stagecorner"><b id="methodLabel">FRAGMENT TRACKING</b> <span id="frameLabel">0000</span></div><div class="stagebottom"><span id="hitBadge">等待运动</span></div><button class="centerplay" id="centerplay" aria-label="开始播放并开启声音">▶</button></div>
+<div class="stage" id="stage"><video id="video" src="sample.mp4" muted loop playsinline preload="auto"></video><canvas id="overlay"></canvas><div class="stagecorner"><b id="methodLabel">FRAGMENT TRACKING</b> <span id="frameLabel">0000</span></div><div class="stagebottom"><span id="hitBadge">等待运动</span></div><button class="centerplay" id="centerplay" aria-label="开始播放并开启声音">▶</button></div>
 <div class="transport"><button id="play" class="primary">▶ 开始演奏</button><button id="restart" title="返回开头">↺ 重播</button><span id="time">00:00 / 00:16</span><label class="loop"><input id="loop" type="checkbox" checked> 循环</label></div>
 <input id="seek" class="seek" type="range" min="0" max="1000" value="0" aria-label="视频进度">
 <div class="belowstage"><span id="status" role="status">已载入示例 · 点击开始，启用声音</span><label><input id="boxes" type="checkbox" checked> 跟随框</label><label><input id="mask" type="checkbox"> 显示检测蒙版</label><label><input id="grid" type="checkbox"> 高度分区</label></div>
@@ -43,8 +44,10 @@
 <div id="trackingControls"><label class="sliderlabel"><span id="minAreaLabel">最小碎片框面积</span> <output id="minAreaOut">120 px²</output><input id="minArea" type="range" min="50" max="800" step="10" value="120"></label><label class="sliderlabel">最多跟踪 <output id="maxTargetsOut">6 个</output><input id="maxTargets" type="range" min="1" max="6" value="6"></label><label class="trailtoggle"><input id="trails" type="checkbox" checked> 显示运动轨迹</label></div>
 </div>
 <div class="settinggroup"><h3><span>02</span> 声音映射</h3><label class="field">音阶<select id="scale"><option value="minor">C 小调五声音阶</option><option value="major">C 大调五声音阶</option><option value="chromatic">半音阶</option></select></label>
-<label class="field">音色<select id="tone"><option value="glass">电钢琴</option><option value="brass">号</option><option value="harp">竖琴</option></select></label>
+<label class="field">音色<select id="tone"><option value="glass">电钢琴</option><option value="brass">号</option><option value="harp">竖琴</option><option value="bell">钟铃</option></select></label>
 <label class="sliderlabel">重触发间隔 <output id="cooldownOut">180 ms</output><input id="cooldown" type="range" min="80" max="800" step="10" value="180"></label>
+<div id="oceanBgmControls" hidden><label><input id="oceanBgmEnabled" type="checkbox" checked> 海浪背景音乐</label><label class="sliderlabel">背景音乐音量 <output id="oceanBgmVolumeOut">45%</output><input id="oceanBgmVolume" type="range" min="0" max="100" value="45"></label></div>
+<label class="sliderlabel">识别声音音量 <output id="recognitionVolumeOut">100%</output><input id="recognitionVolume" type="range" min="0" max="100" value="100"></label>
 <label class="sliderlabel">网页音量 <output id="volumeOut">35%</output><input id="volume" type="range" min="0" max="100" value="35"></label>
 <div class="toggles"><label><input id="sound" type="checkbox" checked> 网页发声</label><label><input id="impact" type="checkbox" checked> <span id="accentLabel">撞击重音</span></label></div></div>
 
@@ -53,4 +56,4 @@
 <section class="explanation"><div><span class="eyebrow">HOW IT WORKS</span><h2>从一帧画面，到一枚音符。</h2><p id="analysisDescription">每帧以 384 像素宽分析玻璃亮轮廓，筛选大碎片，结合位置预测与尺寸匹配保持编号。目标上下移动改变音高，移动速度决定力度，左右位置决定声像；发声时对应框会闪白。</p></div><ol><li><b>01 / 提取</b><span id="extractionDescription">亮轮廓连接 + 尺寸过滤<br>优先保留较大碎片</span></li><li><b>02 / 判断</b><span>跨帧位置预测 + 匹配<br>确认目标后持续编号</span></li><li><b>03 / 演奏</b><span>目标高度 / 速度 / 声像<br>框闪烁与音符同步</span></li></ol></section>
 <details><summary>使用说明</summary><p>点击“开始演奏”启动视频与音频。原视频始终静音，听到的是分析结果驱动的合成声音。更换视频只在浏览器本地读取，不会上传。</p><p>网页的“活跃度”表示变化像素占比，不代表真实物理速度或冲击力。主撞击每轮最多触发一次。切换视频素材时自动使用对应的跟踪预设：玻璃跟踪大碎片，烟花跟踪运动光点，篮球视频跟踪球体并默认使用号音色。玻璃保留一次主撞击；烟花在明显爆发时触发重音。透明、重叠或反光消失时可能丢失或更换编号；虚线框表示暂时丢失，此时不触发新音符。循环或拖动进度会重置检测历史。单帧最多触发 3 个旋律音。轨迹速度以画面宽度/秒估算。</p></details>
 </main><footer><span>动势谱 / MOTION SCORE</span><span>原型 04 · 视频与指尖演奏</span></footer>
-<script src="i18n.js"></script><script src="tracker.js"></script><script src="point-tracker.js"></script><script src="ball-tracker.js"></script><script src="foam-tracker.js"></script><script src="app.js"></script><script src="hand-motion.js"></script><script type="module" src="camera.js?v=20261105-camera2"></script></body></html>
+<script src="i18n.js?v=20261121"></script><script src="tracker.js?v=20261121"></script><script src="point-tracker.js?v=20261121"></script><script src="ball-tracker.js?v=20261121"></script><script src="foam-tracker.js?v=20261121"></script><script src="sample-bank.js?v=20261121"></script><script src="ocean-bgm.js?v=20261121"></script><script src="app.js?v=20261121"></script><script src="hand-remix.js?v=20261121"></script><script src="chord-player.js?v=20261121"></script><script type="module" src="camera.js?v=20261121"></script></body></html>

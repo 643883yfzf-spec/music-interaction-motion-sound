@@ -2,12 +2,12 @@ Motion Score is an interactive web project that transforms visual movement into 
 
 The project is inspired by moments of impact, such as shattering glass, basketball dunks, and speeding race cars. I wanted to turn movement into a form of musical performance—allowing the position, speed, and changes of objects to be heard as well as seen.
 
-The current version supports video object tracking and live fingertip performance through a webcam.
+The current version supports video object tracking and two-hand chord performance through a webcam.
 Features
 - Video-to-music interaction: Tracks larger fragments in a glass-shattering video, displaying object IDs, bounding boxes, and motion trails.
-- Fingertip performance: Detects up to two hands through a webcam, with each fingertip triggering notes independently.
+- Two-hand chord performance: Select and pinch to trigger seven chord clips with your left hand, while your right hand controls volume and filtering. Up to two chords can overlap.
 - Motion mapping: Vertical position controls pitch, horizontal position controls stereo panning, and movement speed affects note velocity.
-- Sound presets: Includes two synthesized sounds: Electric Piano and Horn.
+- Sound presets: Includes Electric Piano, Horn, Harp, and sampled bell sounds. Ocean mode adds a separately adjustable background music layer.
 - Performance controls: Adjustable scale, volume, and audio toggles.
 - Multilingual interface: English by default, with Simplified and Traditional Chinese options.
 
@@ -22,10 +22,11 @@ Video Mode
 4. Choose a sound preset, scale, and volume under Mapping controls.
 
 Camera Mode
-1. Select Camera · Finger play.
+1. Select the Camera tab.
 2. Click Start camera & play and allow camera access.
-3. Keep your entire hand and fingers within the frame.
-4. Move your fingertips to perform: moving upward raises the pitch, moving horizontally changes stereo panning, and faster movement increases note velocity.
+3. Keep both hands fully visible and separated in the left and right control zones.
+4. Move your left hand horizontally to select a chord, then pinch your thumb and index finger to trigger it. Open your fingers before triggering again.
+5. Move your right hand vertically to control volume and horizontally to control filtering. Click a chord card to audition it, or Stop chords to end playback.
 Click Stop camera or switch back to video mode to turn off the camera. Frames are processed locally without recording or uploading. The microphone is not used.
 Technology
 The interface is built with HTML, CSS, and JavaScript. Canvas is used to analyze video frames, MediaPipe detects hand landmarks, and the Web Audio API generates sound.

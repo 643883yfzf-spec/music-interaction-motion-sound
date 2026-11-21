@@ -1,0 +1,104 @@
+[
+  {
+    "file": "Fs1.wav",
+    "midi": 54,
+    "frequency": 186.18,
+    "original": "F#1 - 15.wav"
+  },
+  {
+    "file": "As1.wav",
+    "midi": 58,
+    "frequency": 234.26,
+    "original": "A#1 - 16.wav"
+  },
+  {
+    "file": "B1.wav",
+    "midi": 59,
+    "frequency": 248.18,
+    "original": "B1 - 18.wav"
+  },
+  {
+    "file": "Cs2.wav",
+    "midi": 61,
+    "frequency": 277.41,
+    "original": "C#2 - 17.wav"
+  },
+  {
+    "file": "Fs2.wav",
+    "midi": 66,
+    "frequency": 370.31,
+    "original": "F#2 - 3.wav"
+  },
+  {
+    "file": "As2.wav",
+    "midi": 70,
+    "frequency": 467.7,
+    "original": "A#2 - 4.wav"
+  },
+  {
+    "file": "Cs3.wav",
+    "midi": 73,
+    "frequency": 554.64,
+    "original": "C#3 - 5.wav"
+  },
+  {
+    "file": "E3.wav",
+    "midi": 76,
+    "frequency": 657.71,
+    "original": "E3 - 6.wav"
+  },
+  {
+    "file": "G3.wav",
+    "midi": 79,
+    "frequency": 783.09,
+    "original": "G3 - 7.wav"
+  },
+  {
+    "file": "As3.wav",
+    "midi": 82,
+    "frequency": 933.04,
+    "original": "A#3 - 8.wav"
+  },
+  {
+    "file": "B3.wav",
+    "midi": 83,
+    "frequency": 987.64,
+    "original": "B3 - 9.wav"
+  },
+  {
+    "file": "Cs4.wav",
+    "midi": 85,
+    "frequency": 1110.12,
+    "original": "C#4 - 10.wav"
+  },
+  {
+    "file": "E4.wav",
+    "midi": 88,
+    "frequency": 1321.1,
+    "original": "E4 - 11.wav"
+  },
+  {
+    "file": "Fs4.wav",
+    "midi": 90,
+    "frequency": 1477.83,
+    "original": "F#4 - 12.wav"
+  },
+  {
+    "file": "As4.wav",
+    "midi": 94,
+    "frequency": 1888.69,
+    "original": "A#4 - 13.wav"
+  },
+  {
+    "file": "Cs5.wav",
+    "midi": 97,
+    "frequency": 2240.76,
+    "original": "C#5 - 14.wav"
+  },
+  {
+    "file": "Fs5.wav",
+    "midi": 102,
+    "frequency": 3052.18,
+    "original": "F#5 - 19.wav"
+  }
+]

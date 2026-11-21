@@ -4,21 +4,51 @@ const sourceCanvas=document.createElement('canvas'), sx=sourceCanvas.getContext(
 const overlay=$('overlay'), ox=overlay.getContext('2d'), maskCanvas=document.createElement('canvas'), mx=maskCanvas.getContext('2d');
 const history=$('history'), hx=history.getContext('2d');
 const scales={minor:[0,3,5,7,10],major:[0,2,4,7,9],chromatic:[0,1,2,3,4,5,6,7,8,9,10,11]};
-let prev=null,lastTime=-1,flash=Array(N).fill(0),levels=Array(N).fill(0),noteCount=0,impactCount=0,lastImpact=-999,prevEnergy=0,impactReady=true,trace=[],audio=null,master=null,voices=new Set(),blobURL=null,frameCounter=0,fpsStart=performance.now(),measuredFPS=0,notes=[],bandEls=[],lastHit=-999;
+let prev=null,lastTime=-1,flash=Array(N).fill(0),levels=Array(N).fill(0),noteCount=0,impactCount=0,lastImpact=-999,prevEnergy=0,impactReady=true,trace=[],audio=null,master=null,recognitionGain=null,voices=new Set(),blobURL=null,frameCounter=0,fpsStart=performance.now(),measuredFPS=0,notes=[],bandEls=[],lastHit=-999;
 const presets={glass:{src:'sample.mp4',name:'素材1 · 玻璃碎裂',threshold:28,minArea:120,maxTargets:6,cooldown:180,method:'FRAGMENT TRACKING'},fireworks:{src:'fireworks.mp4',name:'素材2 · 烟花光点',threshold:110,minArea:3,maxTargets:6,cooldown:180,method:'SPARK TRACKING'},basketball:{src:'basketball.mp4',name:'素材3 · 篮球',threshold:28,minArea:18,maxTargets:1,cooldown:180,method:'BASKETBALL TRACKING',tone:'brass',impact:false},ocean:{src:'ocean.mp4',name:'素材4 · 海浪浪花',threshold:160,minArea:10,maxTargets:16,cooldown:320,method:'FOAM PATCH TRACKING',tone:'harp',impact:false}};
-let activePreset='glass',tracker=new FragmentTracker();
+let activePreset='glass',tracker=new FragmentTracker(),pitchTone='glass';
+const bellSamples=new StudentSampleBank();
+let bellLoad=null;
+const oceanBgm=new OceanBgm();
 const isOcean=()=>activePreset==='ocean';let oceanNoteTimes=[];
 const isFireworks=()=>activePreset==='fireworks',isBasketball=()=>activePreset==='basketball';
 const waitingTargets=()=>isOcean()?'等待运动的浪花团块…':isBasketball()?'等待篮球进入画面…':isFireworks()?'等待可分离的烟花光点…':'等待可分离的大碎片…';let trackedTargets=[],lastTargetSound=-999;const targetColors=['#d5a1ff','#79dfdc','#ffbc77','#d2fa85','#f49cae','#94b9ff'];
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-function makeBands(){const scale=scales[$('scale').value],pool=[];for(let n=48;n<=($('tone').value==='harp'?84:76);n++)if(scale.includes(n%12))pool.push(n);notes=Array.from({length:N},(_,i)=>['brass','harp'].includes($('tone').value)?pool[Math.round(i*(pool.length-1)/(N-1))]:48+scale[i%scale.length]+12*Math.floor(i/scale.length));$('bands').replaceChildren();bandEls=[];for(let i=N-1;i>=0;i--){const d=document.createElement('div');d.className='band';d.innerHTML='<span>'+noteName(notes[i])+'</span><i></i>';$('bands').append(d);bandEls[i]=d;}}
+function makeBands(){const tone=$('tone').value;if(tone!=='bell')pitchTone=tone;const scale=scales[$('scale').value],pool=[];for(let n=48;n<=(pitchTone==='harp'?84:76);n++)if(scale.includes(n%12))pool.push(n);notes=Array.from({length:N},(_,i)=>['brass','harp'].includes(pitchTone)?pool[Math.round(i*(pool.length-1)/(N-1))]:48+scale[i%scale.length]+12*Math.floor(i/scale.length));$('bands').replaceChildren();bandEls=[];for(let i=N-1;i>=0;i--){const d=document.createElement('div');d.className='band';d.innerHTML='<span>'+noteName(notes[i])+'</span><i></i>';$('bands').append(d);bandEls[i]=d;}}
 function noteName(n){return ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'][n%12]+(Math.floor(n/12)-1);}
 function tell(text){$('status').textContent=text;}
 function stopSounds(){for(const o of voices){try{o.stop();}catch{}}voices.clear();}
-function resetAnalysis(counts=false){prev=null;lastTime=-1;oceanNoteTimes=[];tracker.reset();trackedTargets=[];$('targetList').textContent=waitingTargets();$('targetCount').textContent='0 / '+$('maxTargets').value;flash.fill(0);levels.fill(0);prevEnergy=0;lastImpact=-999;lastHit=-999;impactReady=true;stopSounds();if(counts){noteCount=0;impactCount=0;trace=[];$('noteCount').textContent=0;$('impactCount').textContent=0;}$('energy').innerHTML='0.0<small>%</small>';$('hitBadge').textContent='等待运动';$('lastNote').textContent='—';bandEls.forEach(el=>el.classList.remove('active'));drawHistory();drawOverlay(video.currentTime);}
-async function initAudio(){if(!audio){audio=new(window.AudioContext||window.webkitAudioContext)();master=audio.createGain();const compressor=audio.createDynamicsCompressor();compressor.threshold.value=-15;compressor.ratio.value=8;master.connect(compressor);compressor.connect(audio.destination);master.gain.value=Number($('volume').value)/100*.5;}if(audio.state==='suspended')await audio.resume();}
+function resetAnalysis(counts=false,stopAudio=true){prev=null;lastTime=-1;oceanNoteTimes=[];tracker.reset();trackedTargets=[];$('targetList').textContent=waitingTargets();$('targetCount').textContent='0 / '+$('maxTargets').value;flash.fill(0);levels.fill(0);prevEnergy=0;lastImpact=-999;lastHit=-999;impactReady=true;if(stopAudio)stopSounds();if(counts){noteCount=0;impactCount=0;trace=[];$('noteCount').textContent=0;$('impactCount').textContent=0;}$('energy').innerHTML='0.0<small>%</small>';$('hitBadge').textContent='等待运动';$('lastNote').textContent='—';bandEls.forEach(el=>el.classList.remove('active'));drawHistory();drawOverlay(video.currentTime);}
+async function initAudio(){if(!audio){audio=new(window.AudioContext||window.webkitAudioContext)();master=audio.createGain();recognitionGain=audio.createGain();recognitionGain.gain.value=Number($('recognitionVolume').value)/100;recognitionGain.connect(master);const compressor=audio.createDynamicsCompressor();compressor.threshold.value=-15;compressor.ratio.value=8;master.connect(compressor);compressor.connect(audio.destination);master.gain.value=Number($('volume').value)/100*.5;}if(audio.state==='suspended')await audio.resume();if($('tone').value==='bell')await prepareBell();}
+function hasOceanBgm(){return isOcean()&&!blobURL;}
+function updateOceanBgm(){
+ $('oceanBgmControls').hidden=!hasOceanBgm();
+ $('oceanBgmVolumeOut').textContent=$('oceanBgmVolume').value+'%';
+ oceanBgm.setVolume(Number($('oceanBgmVolume').value)/100);
+ if(hasOceanBgm()&&!video.paused&&$('sound').checked&&$('oceanBgmEnabled').checked)oceanBgm.play(audio,master);
+ else oceanBgm.pause();
+}
+async function prepareOceanBgm(){
+ if(!hasOceanBgm()||!$('sound').checked||!$('oceanBgmEnabled').checked)return;
+ try{await oceanBgm.load(audio);}
+ catch(error){console.error(error);tell(window.i18n.text('背景音乐载入失败，请重试播放。'));return false;}
+}
+function prepareBell(){
+ if(!audio||bellSamples.ready)return;
+ if(!bellLoad)bellLoad=bellSamples.load(audio,'./samples/bell/',.2).catch(error=>{
+  console.error(error);
+  throw Error('Bell 采样载入失败，请检查项目中的音频文件。');
+ }).finally(()=>{bellLoad=null;});
+ return bellLoad;
+}
+function loadSelectedTone(){
+ if($('tone').value!=='bell')return;
+ prepareBell()?.catch(error=>{
+  if($('tone').value==='bell')($('cameraPanel').hidden?$('status'):$('cameraStatus')).textContent=error.message;
+ });
+}
 function trackVoice(node){voices.add(node);node.onended=()=>voices.delete(node);}
-function synth(note,velocity,pan=0,hit=false){if(!audio||audio.state!=='running'||!$('sound').checked||voices.size>($('tone').value==='harp'?40:26))return;if(!hit&&$('tone').value==='harp'){playHarp(note,velocity,pan);return;}if(!hit&&$('tone').value==='brass'){playHorn(note,velocity,pan);return;}const t=audio.currentTime,g=audio.createGain(),p=audio.createStereoPanner();p.pan.value=clamp(pan,-1,1);g.connect(p);p.connect(master);const o=audio.createOscillator();o.type='sine';o.connect(g);if(hit){o.frequency.setValueAtTime(115,t);o.frequency.exponentialRampToValueAtTime(38,t+.22);g.gain.setValueAtTime(.001,t);g.gain.exponentialRampToValueAtTime(.7,t+.006);g.gain.exponentialRampToValueAtTime(.001,t+.45);o.start(t);o.stop(t+.47);}else{const freq=440*Math.pow(2,(note-69)/12);o.frequency.value=freq;const length=$('tone').value==='glass'?.6:.36;const amp=.17*(velocity/127);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(.001,amp),t+.005);g.gain.exponentialRampToValueAtTime(.0001,t+length);o.start(t);o.stop(t+length+.02);if($('tone').value==='glass'){const overtone=audio.createOscillator(),og=audio.createGain();overtone.frequency.value=freq*2.756;og.gain.setValueAtTime(amp*.22,t);og.gain.exponentialRampToValueAtTime(.0001,t+.18);overtone.connect(og);og.connect(p);overtone.start(t);overtone.stop(t+.2);trackVoice(overtone);}}trackVoice(o);}
+function synth(note,velocity,pan=0,hit=false){if(!audio||audio.state!=='running'||!$('sound').checked||voices.size>($('tone').value==='harp'?40:26))return;if(!hit&&$('tone').value==='bell'){const source=bellSamples.play(audio,recognitionGain,note,velocity,pan);if(source)trackVoice(source);return;}if(!hit&&$('tone').value==='harp'){playHarp(note,velocity,pan);return;}if(!hit&&$('tone').value==='brass'){playHorn(note,velocity,pan);return;}const t=audio.currentTime,g=audio.createGain(),p=audio.createStereoPanner();p.pan.value=clamp(pan,-1,1);g.connect(p);p.connect(recognitionGain);const o=audio.createOscillator();o.type='sine';o.connect(g);if(hit){o.frequency.setValueAtTime(115,t);o.frequency.exponentialRampToValueAtTime(38,t+.22);g.gain.setValueAtTime(.001,t);g.gain.exponentialRampToValueAtTime(.7,t+.006);g.gain.exponentialRampToValueAtTime(.001,t+.45);o.start(t);o.stop(t+.47);}else{const freq=440*Math.pow(2,(note-69)/12);o.frequency.value=freq;const length=$('tone').value==='glass'?.6:.36;const amp=.17*(velocity/127);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(.001,amp),t+.005);g.gain.exponentialRampToValueAtTime(.0001,t+length);o.start(t);o.stop(t+length+.02);if($('tone').value==='glass'){const overtone=audio.createOscillator(),og=audio.createGain();overtone.frequency.value=freq*2.756;og.gain.setValueAtTime(amp*.22,t);og.gain.exponentialRampToValueAtTime(.0001,t+.18);overtone.connect(og);og.connect(p);overtone.start(t);overtone.stop(t+.2);trackVoice(overtone);}}trackVoice(o);}
 
 function playHarp(note,velocity,pan){
  const t=audio.currentTime,f=440*2**((note-69)/12),osc=audio.createOscillator(),gain=audio.createGain(),filter=audio.createBiquadFilter(),stereo=audio.createStereoPanner();
@@ -26,7 +56,7 @@ function playHarp(note,velocity,pan){
  osc.setPeriodicWave(audio.createPeriodicWave(real,imag));osc.frequency.value=f;
  filter.type='lowpass';filter.frequency.setValueAtTime(Math.min(9000,f*12),t);filter.frequency.exponentialRampToValueAtTime(Math.max(900,f*3),t+.8);
  const amp=.18*(velocity/127);gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(Math.max(.001,amp),t+.004);gain.gain.exponentialRampToValueAtTime(Math.max(.001,amp*.3),t+.16);gain.gain.exponentialRampToValueAtTime(.0001,t+1.1);
- stereo.pan.value=clamp(pan,-1,1);osc.connect(filter);filter.connect(gain);gain.connect(stereo);stereo.connect(master);trackVoice(osc);osc.start(t);osc.stop(t+1.13);
+ stereo.pan.value=clamp(pan,-1,1);osc.connect(filter);filter.connect(gain);gain.connect(stereo);stereo.connect(recognitionGain);trackVoice(osc);osc.start(t);osc.stop(t+1.13);
  osc.addEventListener('ended',()=>{osc.disconnect();filter.disconnect();gain.disconnect();stereo.disconnect();});
 }
 
@@ -35,13 +65,24 @@ function playHorn(note,velocity,pan){
  stereo.pan.value=clamp(pan,-1,1);filter.type='lowpass';filter.Q.value=.75;
  filter.frequency.setValueAtTime(Math.min(1800,freq*2),now);filter.frequency.exponentialRampToValueAtTime(Math.min(7500,freq*8),now+.028);filter.frequency.exponentialRampToValueAtTime(Math.min(4200,freq*3.8),now+.16);
  gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(Math.max(.001,level),now+.018);gain.gain.exponentialRampToValueAtTime(Math.max(.001,level*.58),now+.1);gain.gain.setValueAtTime(Math.max(.001,level*.58),now+.19);gain.gain.exponentialRampToValueAtTime(.0001,now+.36);
- filter.connect(gain);gain.connect(stereo);stereo.connect(master);
+ filter.connect(gain);gain.connect(stereo);stereo.connect(recognitionGain);
  for(const [type,detune,amount]of [['sawtooth',-2,.65],['triangle',2,.35]]){const osc=audio.createOscillator(),mix=audio.createGain();osc.type=type;osc.frequency.setValueAtTime(freq*.992,now);osc.frequency.exponentialRampToValueAtTime(freq,now+.025);osc.detune.value=detune;mix.gain.value=amount;osc.connect(mix);mix.connect(filter);trackVoice(osc);osc.addEventListener('ended',()=>{osc.disconnect();mix.disconnect();});osc.start(now);osc.stop(now+.38);}
 }
-async function playPause(){try{await initAudio();if(video.paused){if(video.ended)video.currentTime=0;await video.play();tell('目标跟踪中 · 框的位置 → 音高，速度 → 力度');}else video.pause();}catch(e){tell('无法播放：'+e.message);}}
+async function playPause(){
+ if(!video.paused){video.pause();return;}
+ const source=video.src;
+ try{
+  await initAudio();
+  const bgmReady=await prepareOceanBgm();
+  if($('videoWorkspace').hidden||video.src!==source)return;
+  if(video.ended){oceanBgm.reset();video.currentTime=0;}
+  await video.play();
+  tell(bgmReady===false?window.i18n.text('背景音乐载入失败，请重试播放。'):'目标跟踪中 · 框的位置 → 音高，速度 → 力度');
+ }catch(e){tell('无法播放：'+window.i18n.text(e.message));}
+}
 function analysisBounds(w,h){if(isOcean())return{x:0,r:w,top:Math.floor(h*.16),bottom:h};if(isBasketball())return{x:0,r:w,top:0,bottom:h};return{x:0,r:w,top:Math.floor(h*(isFireworks()?.01:.02)),bottom:Math.floor(h*(isFireworks()?.99:.92))};}
 function analyze(time){if(!video.videoWidth||video.seeking)return;const w=384,h=Math.round(w*video.videoHeight/video.videoWidth);if(sourceCanvas.width!==w||sourceCanvas.height!==h){sourceCanvas.width=w;sourceCanvas.height=h;maskCanvas.width=w;maskCanvas.height=h;overlay.width=w*4;overlay.height=h*4;prev=null;}sx.drawImage(video,0,0,w,h);const raw=sx.getImageData(0,0,w,h).data,gray=new Uint8Array(w*h);for(let i=0;i<gray.length;i++)gray[i]=(raw[i*4]*.2126+raw[i*4+1]*.7152+raw[i*4+2]*.0722);
- if(time===lastTime||(isOcean()&&prev&&gray.every((v,i)=>v===prev[i]))){drawOverlay(time);return;}if(time<lastTime){resetAnalysis(true);}if(prev===null||time-lastTime>.2){prev=gray;lastTime=time;drawOverlay(time);return;}
+ if(time===lastTime||(isOcean()&&prev&&gray.every((v,i)=>v===prev[i]))){drawOverlay(time);return;}if(time<lastTime){resetAnalysis(true,false);}if(prev===null||time-lastTime>.2){prev=gray;lastTime=time;drawOverlay(time);return;}
  const bounds=analysisBounds(w,h),counts=Array(N).fill(0),totals=Array(N).fill(0),img=mx.createImageData(w,h),threshold=Number($('threshold').value);let active=0,total=0,sumX=0;
  for(let y=bounds.top;y<bounds.bottom;y++){const band=clamp(Math.floor((1-(y-bounds.top)/(bounds.bottom-bounds.top))*N),0,N-1);for(let x=bounds.x;x<bounds.r;x++){const idx=y*w+x;totals[band]++;total++;const amount=Math.abs(gray[idx]-prev[idx]);if(isOcean()?(gray[idx]>=threshold&&amount>=14):amount>=threshold){counts[band]++;active++;sumX+=x;const p=idx*4;img.data[p]=180;img.data[p+1]=250;img.data[p+2]=120;img.data[p+3]=200;}}}
  mx.putImageData(img,0,0);levels=counts.map((v,i)=>v/Math.max(1,totals[i]));const energy=active/Math.max(1,total),cooldown=Number($('cooldown').value)/1000;
@@ -77,18 +118,20 @@ function clock(v){if(!Number.isFinite(v))return '00:00';return Math.floor(v/60).
 function uiTime(){$('time').textContent=clock(video.currentTime)+' / '+clock(video.duration);$('seek').value=video.duration?Math.round(video.currentTime/video.duration*1000):0;}
 function onFrame(now,meta){if(!video.paused&&!video.seeking)analyze(meta?meta.mediaTime:video.currentTime);uiTime();if(video.requestVideoFrameCallback)video.requestVideoFrameCallback(onFrame);else requestAnimationFrame(onFrame);}
 $('play').onclick=playPause;$('centerplay').onclick=playPause;
-video.addEventListener('play',()=>{frameCounter=0;fpsStart=performance.now();$('play').textContent='Ⅱ 暂停';$('centerplay').hidden=true;});
-video.addEventListener('pause',()=>{$('play').textContent='▶ 继续演奏';$('centerplay').hidden=false;stopSounds();tell('已暂停 · 点击继续演奏');});
-video.addEventListener('ended',()=>{resetAnalysis();$('play').textContent='▶ 重新演奏';tell('播放结束 · 可重播或更换视频');});
-video.addEventListener('seeking',()=>resetAnalysis(true));video.addEventListener('seeked',()=>{analyze(video.currentTime);uiTime();});
+video.addEventListener('play',()=>{updateOceanBgm();frameCounter=0;fpsStart=performance.now();$('play').textContent='Ⅱ 暂停';$('centerplay').hidden=true;});
+video.addEventListener('pause',()=>{oceanBgm.pause();$('play').textContent='▶ 继续演奏';$('centerplay').hidden=false;stopSounds();tell('已暂停 · 点击继续演奏');});
+video.addEventListener('ended',()=>{oceanBgm.reset();resetAnalysis();$('play').textContent='▶ 重新演奏';tell('播放结束 · 可重播或更换视频');});
+// Native video looping seeks to zero. Let existing notes finish their envelopes.
+video.addEventListener('seeking',()=>resetAnalysis(true,false));video.addEventListener('seeked',()=>{analyze(video.currentTime);uiTime();});
 video.addEventListener('loadedmetadata',()=>{$('stage').style.aspectRatio=video.videoWidth+'/'+video.videoHeight;$('stage').style.setProperty('--video-ratio',video.videoWidth/video.videoHeight);});
 video.addEventListener('loadeddata',()=>{resetAnalysis(true);analyze(video.currentTime);uiTime();tell('视频已就绪 · 点击开始演奏');});
 video.addEventListener('error',()=>tell('视频无法解码，请更换 H.264 编码的 MP4 文件。'));
-$('restart').onclick=()=>{resetAnalysis(true);video.currentTime=0;uiTime();};$('loop').onchange=()=>video.loop=$('loop').checked;video.loop=true;
-$('seek').addEventListener('input',()=>{if(Number.isFinite(video.duration)){video.currentTime=Number($('seek').value)/1000*video.duration;}});
-$('file').onchange=()=>{const f=$('file').files[0];if(!f)return;for(const id of ['glassSample','fireworksSample','basketballSample','oceanSample']){$(id).classList.remove('selected');$(id).setAttribute('aria-pressed','false');}video.pause();resetAnalysis(true);if(blobURL)URL.revokeObjectURL(blobURL);blobURL=URL.createObjectURL(f);video.src=blobURL;video.load();$('filename').dataset.noI18n='';$('filename').textContent=f.name;$('play').textContent='▶ 开始演奏';};
+$('restart').onclick=()=>{oceanBgm.reset();resetAnalysis(true);video.currentTime=0;uiTime();updateOceanBgm();};$('loop').onchange=()=>video.loop=$('loop').checked;
+$('seek').addEventListener('input',()=>{if(Number.isFinite(video.duration)){resetAnalysis(true);video.currentTime=Number($('seek').value)/1000*video.duration;}});
+$('file').onchange=()=>{const f=$('file').files[0];if(!f)return;$('stage').classList.remove('half-size');for(const id of ['glassSample','fireworksSample','basketballSample','oceanSample']){$(id).classList.remove('selected');$(id).setAttribute('aria-pressed','false');}video.pause();oceanBgm.reset();resetAnalysis(true);if(blobURL)URL.revokeObjectURL(blobURL);blobURL=URL.createObjectURL(f);updateOceanBgm();video.src=blobURL;video.load();$('filename').dataset.noI18n='';$('filename').textContent=f.name;$('play').textContent='▶ 开始演奏';};
 
 function configurePreset(key){
+ $('stage').classList.toggle('half-size',key==='fireworks'||key==='ocean');
  activePreset=key;const p=presets[key];tracker=isOcean()?new FoamTracker():isBasketball()?new BasketballTracker():isFireworks()?new BrightPointTracker():new FragmentTracker();
  $('tone').value=p.tone||'glass';$('impact').checked=p.impact!==false;$('maxTargets').disabled=isBasketball();$('maxTargets').max=isOcean()?'24':isBasketball()?'1':'6';
  $('threshold').max=isOcean()?'240':'160';$('thresholdLabel').textContent=isOcean()?'浪花亮度阈值':isBasketball()?'橙色匹配阈值':'亮度 / 像素阈值';
@@ -99,10 +142,10 @@ function configurePreset(key){
  $('accentLabel').textContent=isBasketball()?'运动重音':isFireworks()?'爆发重音':'撞击重音';$('accentMetric').textContent=isBasketball()?'运动重音':isFireworks()?'烟花爆发':'主撞击';
  $('analysisDescription').textContent=isOcean()?'跟踪局部明亮且运动的浪花团块，默认同时选择16个，最多24个。高度、速度和左右位置驱动声音；每秒最多18个音符，轮流让不同团块发声，避免持续堆叠。浪花分裂或消散后编号可能更换。':isBasketball()?'结合篮球的橙色、圆形轮廓和连续运动定位球体，并针对片段的镜头变化校准搜索位置。篮球的高度、速度与左右位置驱动号音色；发声时球体圆环闪白。篮球离开画面或无法确认时停止触发。':isFireworks()?'逐帧提取明亮且运动的烟花光点，优先定位光尾前方的新亮点，过滤静态文字与大面积爆发中心。跨帧预测位置保持编号；高度控制音高，速度控制力度，左右控制声像。光点发声时圆环闪白。':'每帧以 384 像素宽分析玻璃亮轮廓，筛选大碎片，结合位置预测与尺寸匹配保持编号。目标上下移动改变音高，移动速度决定力度，左右位置决定声像；发声时对应框会闪白。';
  $('extractionDescription').textContent=isOcean()?'运动白色浪花 + 局部团块分离':isBasketball()?'橙色球体 + 圆形轮廓 + 运动匹配':isFireworks()?'运动亮点 + 光尾前端定位':'亮轮廓连接 + 尺寸过滤 · 优先保留较大碎片';
- updateLabels();
+ updateLabels();updateOceanBgm();
 }
 function selectSample(key){
- video.pause();if(blobURL){URL.revokeObjectURL(blobURL);blobURL=null;}$('file').value='';
+ video.pause();oceanBgm.reset();if(blobURL){URL.revokeObjectURL(blobURL);blobURL=null;}$('file').value='';
  configurePreset(key);makeBands();resetAnalysis(true);
  for(const [id,value]of [['glassSample','glass'],['fireworksSample','fireworks'],['basketballSample','basketball'],['oceanSample','ocean']]){const selected=key===value;$(id).classList.toggle('selected',selected);$(id).setAttribute('aria-pressed',String(selected));}
  delete $('filename').dataset.noI18n;$('filename').textContent=presets[key].name;
@@ -110,12 +153,14 @@ function selectSample(key){
 }
 $('glassSample').onclick=()=>selectSample('glass');$('fireworksSample').onclick=()=>selectSample('fireworks');$('basketballSample').onclick=()=>selectSample('basketball');$('oceanSample').onclick=()=>selectSample('ocean');
 
-function updateLabels(){$('thresholdOut').textContent=$('threshold').value;$('minAreaOut').textContent=$('minArea').value+(isOcean()||isFireworks()||isBasketball()?' px':' px²');$('maxTargetsOut').textContent=$('maxTargets').value+' 个';$('cooldownOut').textContent=$('cooldown').value+' ms';$('volumeOut').textContent=$('volume').value+'%';if(master)master.gain.setTargetAtTime(Number($('volume').value)/100*.5,audio.currentTime,.03);}
-['threshold','cooldown','volume','minArea','maxTargets'].forEach(id=>$(id).addEventListener('input',updateLabels));
-['scale','tone'].forEach(id=>$(id).addEventListener('change',()=>{resetAnalysis();if(id==='scale'||id==='tone')makeBands();updateLabels();renderTargets(video.currentTime);analyze(video.currentTime);}));
+function updateLabels(){$('thresholdOut').textContent=$('threshold').value;$('minAreaOut').textContent=$('minArea').value+(isOcean()||isFireworks()||isBasketball()?' px':' px²');$('maxTargetsOut').textContent=$('maxTargets').value+' 个';$('cooldownOut').textContent=$('cooldown').value+' ms';$('volumeOut').textContent=$('volume').value+'%';$('recognitionVolumeOut').textContent=$('recognitionVolume').value+'%';if(recognitionGain)recognitionGain.gain.setTargetAtTime(Number($('recognitionVolume').value)/100,audio.currentTime,.03);if(master)master.gain.setTargetAtTime(Number($('volume').value)/100*.5,audio.currentTime,.03);}
+['threshold','cooldown','volume','recognitionVolume','minArea','maxTargets'].forEach(id=>$(id).addEventListener('input',updateLabels));
+['scale','tone'].forEach(id=>$(id).addEventListener('change',()=>{resetAnalysis();makeBands();if(id==='tone')loadSelectedTone();updateLabels();renderTargets(video.currentTime);analyze(video.currentTime);}));
 ['grid','mask','boxes','trails'].forEach(id=>$(id).onchange=()=>drawOverlay(video.currentTime));
-$('sound').onchange=()=>{stopSounds();if($('sound').checked)initAudio().catch(e=>tell(e.message));};
-$('reset').onclick=()=>{const p=presets[activePreset],vals={minArea:p.minArea,maxTargets:p.maxTargets,scale:'minor',tone:p.tone||'glass',threshold:p.threshold,cooldown:p.cooldown,volume:'35'};for(const [id,v]of Object.entries(vals))$(id).value=v;$('sound').checked=true;$('impact').checked=p.impact!==false;$('grid').checked=false;$('boxes').checked=true;$('trails').checked=true;$('mask').checked=false;resetAnalysis(true);makeBands();updateLabels();analyze(video.currentTime);tell(isOcean()?'已恢复海浪预设 · 竖琴音色':isBasketball()?'已恢复篮球预设 · 号音色':isFireworks()?'已恢复烟花光点预设':'已恢复玻璃碎裂预设');};
+$('sound').onchange=async()=>{stopSounds();updateOceanBgm();if($('sound').checked){try{await initAudio();await prepareOceanBgm();updateOceanBgm();}catch(e){tell(e.message);}}};
+$('oceanBgmEnabled').onchange=async()=>{updateOceanBgm();if(!video.paused){await prepareOceanBgm();updateOceanBgm();}};
+$('oceanBgmVolume').oninput=updateOceanBgm;
+$('reset').onclick=()=>{const p=presets[activePreset],vals={minArea:p.minArea,maxTargets:p.maxTargets,scale:'minor',tone:p.tone||'glass',threshold:p.threshold,cooldown:p.cooldown,volume:'35',recognitionVolume:'100'};for(const [id,v]of Object.entries(vals))$(id).value=v;$('sound').checked=true;$('impact').checked=p.impact!==false;$('grid').checked=false;$('boxes').checked=true;$('trails').checked=true;$('mask').checked=false;$('oceanBgmEnabled').checked=true;$('oceanBgmVolume').value='45';resetAnalysis(true);makeBands();updateLabels();if(audio)prepareOceanBgm().then(updateOceanBgm);else updateOceanBgm();analyze(video.currentTime);tell(isOcean()?'已恢复海浪预设 · 竖琴音色':isBasketball()?'已恢复篮球预设 · 号音色':isFireworks()?'已恢复烟花光点预设':'已恢复玻璃碎裂预设');};
 window.addEventListener('pagehide',()=>{video.pause();stopSounds();});window.addEventListener('resize',drawHistory);
 configurePreset(activePreset);makeBands();updateLabels();if(video.requestVideoFrameCallback)video.requestVideoFrameCallback(onFrame);else requestAnimationFrame(onFrame);
 // Read-only diagnostics for validation, without changing state.
@@ -126,5 +171,5 @@ window.motionAudioBridge={
  notes:()=>[...notes], name:noteName,
  play:(note,velocity,pan)=>{synth(note,velocity,pan);},
  settings:()=>({tone:$('tone').value,scale:$('scale').value,volume:$('volume').value,sound:$('sound').checked}),
- configure:({tone,scale,volume,sound})=>{if(tone!==undefined&&tone!==$('tone').value){$('tone').value=tone;makeBands();}if(scale!==undefined&&scale!==$('scale').value){$('scale').value=scale;makeBands();}if(volume!==undefined)$('volume').value=volume;if(sound!==undefined)$('sound').checked=sound;updateLabels();}
+ configure:({tone,scale,volume,sound})=>{if(tone!==undefined&&tone!==$('tone').value){$('tone').value=tone;makeBands();loadSelectedTone();}if(scale!==undefined&&scale!==$('scale').value){$('scale').value=scale;makeBands();}if(volume!==undefined)$('volume').value=volume;if(sound!==undefined)$('sound').checked=sound;updateLabels();}
 };

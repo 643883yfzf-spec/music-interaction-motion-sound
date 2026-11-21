@@ -164,7 +164,59 @@ Object.assign(dictionary,{'读取摄像头画面失败：':'Camera frame error: 
 Object.assign(dictionary,{'切换回视频模式会自动关闭摄像头。': 'Switching to video mode turns the camera off.', '使用说明': 'Usage', '网页的“活跃度”表示变化像素占比，不代表真实物理速度或冲击力。主撞击每轮最多触发一次。玻璃碎裂视频默认使用大碎片跟踪，分析全画面并排除边缘水印。透明、重叠或反光消失时可能丢失或更换编号；虚线框表示暂时丢失，此时不触发新音符。循环或拖动进度会重置检测历史。单帧最多触发 3 个旋律音。轨迹速度以画面宽度/秒估算。': 'Activity measures changing pixels, not physical force or speed. The impact accent fires once per video loop. The glass video uses Large fragments tracking across the full frame, excluding edge watermarks. Transparent, overlapping or fading reflections may lose or change track IDs. Dashed boxes indicate lost tracks and do not trigger notes. Looping or seeking resets tracking. Up to three melody notes play per frame. Speed is measured relative to image width.'});
 Object.assign(dictionary,{"跟随碎片与烟花光点，让每个目标的位置与速度驱动声音。": "Follow glass fragments and firework sparks. Position and speed become sound.", "视频素材": "Video samples", "01 玻璃碎裂": "01 Glass fragments", "02 烟花光点": "02 Firework sparks", "素材2 · 烟花光点": "Sample 2 · Firework sparks", "白色闪烁 = 此目标正在发声": "White flash = this target is sounding", "等待可分离的烟花光点…": "Waiting for distinct firework sparks…", "光点运动中": "Sparks moving", "● 烟花爆发": "● Firework burst", "烟花爆发": "Firework bursts", "爆发重音": "Burst accent", "最小光点像素数": "Minimum spark pixels", "已恢复烟花光点预设": "Firework preset restored", "运动亮点 + 光尾前端定位": "Moving bright points + spark head localization", "亮轮廓连接 + 尺寸过滤 · 优先保留较大碎片": "Bright contours + size filtering · Prioritize larger fragments", "逐帧提取明亮且运动的烟花光点，优先定位光尾前方的新亮点，过滤静态文字与大面积爆发中心。跨帧预测位置保持编号；高度控制音高，速度控制力度，左右控制声像。光点发声时圆环闪白。": "Detect bright moving sparks frame by frame, favoring newly illuminated spark heads over fading tails. Filter static lettering and merged burst cores. Position prediction preserves IDs. Height sets pitch, speed sets velocity, and horizontal position sets pan. Rings flash white when notes play.", "网页的“活跃度”表示变化像素占比，不代表真实物理速度或冲击力。主撞击每轮最多触发一次。切换视频素材时自动使用对应的跟踪预设：玻璃跟踪大碎片，烟花跟踪运动光点，篮球视频跟踪球体并默认使用号音色。玻璃保留一次主撞击；烟花在明显爆发时触发重音。透明、重叠或反光消失时可能丢失或更换编号；虚线框表示暂时丢失，此时不触发新音符。循环或拖动进度会重置检测历史。单帧最多触发 3 个旋律音。轨迹速度以画面宽度/秒估算。": "Activity measures changing pixels, not physical force. Each sample automatically uses its own preset: large fragments for glass, moving sparks for fireworks, and the ball with Horn audio for basketball. Glass has one main impact per loop; fireworks trigger accents on distinct bursts. Overlapping or fading targets may lose or change IDs. Dashed markers indicate lost targets and do not trigger new notes. Looping or seeking resets tracking. Up to three melody notes play per frame. Speed is relative to image width."});
 Object.assign(dictionary,{"跟随碎片、烟花与篮球，让每个目标的位置与速度驱动声音。": "Follow fragments, firework sparks and the basketball. Position and speed become sound.", "03 篮球跟踪": "03 Basketball", "素材3 · 篮球": "Sample 3 · Basketball", "等待篮球进入画面…": "Waiting for the basketball…", "橙色匹配阈值": "Orange color threshold", "最小篮球像素数": "Minimum ball pixels", "运动重音": "Motion accent", "● 运动重音": "● Motion accent", "篮球运动中": "Basketball moving", "已恢复篮球预设 · 号音色": "Basketball preset restored · Horn", "橙色球体 + 圆形轮廓 + 运动匹配": "Orange ball + circular shape + motion matching", "结合篮球的橙色、圆形轮廓和连续运动定位球体，并针对片段的镜头变化校准搜索位置。篮球的高度、速度与左右位置驱动号音色；发声时球体圆环闪白。篮球离开画面或无法确认时停止触发。": "Locate the basketball using orange color, circular shape and continuous motion, with search positions calibrated to this clip's camera shots. Height, speed and horizontal position drive the Horn preset. The ball marker flashes white when notes play. No new notes are triggered when the ball leaves the frame or cannot be confirmed."});
-Object.assign(dictionary,{"竖琴": "Harp", "04 海浪浪花": "04 Ocean foam", "素材4 · 海浪浪花": "Sample 4 · Ocean foam", "等待运动的浪花团块…": "Waiting for moving foam patches…", "浪花运动中": "Foam moving", "浪花亮度阈值": "Foam brightness threshold", "最小运动浪花像素数": "Minimum moving foam pixels", "已恢复海浪预设 · 竖琴音色": "Ocean preset restored · Harp", "运动白色浪花 + 局部团块分离": "Moving white foam + separated local patches", "跟随碎片、烟花、篮球与浪花，让运动成为声音。": "Follow fragments, sparks, basketball and foam. Turn motion into sound.", "跟踪局部明亮且运动的浪花团块，默认同时选择16个，最多24个。高度、速度和左右位置驱动声音；每秒最多18个音符，轮流让不同团块发声，避免持续堆叠。浪花分裂或消散后编号可能更换。": "Track local bright moving foam patches: 16 by default, up to 24. Height, speed and horizontal position drive sound. Up to 18 notes per second, with turns shared across patches. Splitting or fading foam may change IDs."});
+Object.assign(dictionary,{"钟铃": "Bell", "Bell 采样载入失败，请检查项目中的音频文件。": "Bell samples could not be loaded. Check the project audio files.", "竖琴": "Harp", "04 海浪浪花": "04 Ocean foam", "素材4 · 海浪浪花": "Sample 4 · Ocean foam", "等待运动的浪花团块…": "Waiting for moving foam patches…", "浪花运动中": "Foam moving", "浪花亮度阈值": "Foam brightness threshold", "最小运动浪花像素数": "Minimum moving foam pixels", "已恢复海浪预设 · 竖琴音色": "Ocean preset restored · Harp", "运动白色浪花 + 局部团块分离": "Moving white foam + separated local patches", "跟随碎片、烟花、篮球与浪花，让运动成为声音。": "Follow fragments, sparks, basketball and foam. Turn motion into sound.", "跟踪局部明亮且运动的浪花团块，默认同时选择16个，最多24个。高度、速度和左右位置驱动声音；每秒最多18个音符，轮流让不同团块发声，避免持续堆叠。浪花分裂或消散后编号可能更换。": "Track local bright moving foam patches: 16 by default, up to 24. Height, speed and horizontal position drive sound. Up to 18 notes per second, with turns shared across patches. Splitting or fading foam may change IDs."});
+Object.assign(traditional,{'钟':'鐘','铃':'鈴'});
+Object.assign(dictionary,{'海浪背景音乐':'Ocean background music','背景音乐音量':'Background music volume','识别声音音量':'Recognition sound volume','背景音乐载入失败，请重试播放。':'Background music could not load. Try playing again.'});
+Object.assign(dictionary,{
+ '02 摄像头 · 和弦演奏':'02 Camera · Chord performance',
+ '和弦演奏设置':'Chord performance',
+ '左手 · 选和弦':'Left hand · Chords',
+ '左右移动选择 · 拇指与食指捏合触发':'Move to select · Pinch thumb and index to play',
+ '右手 · 塑造声音':'Right hand · Expression',
+ '↑ 音量增大　→ 声音更明亮':'↑ Louder　→ Brighter',
+ '双手分区，让和弦流动。':'Two hands. Flowing chords.',
+ '左手放左侧，右手放右侧。先张开左手，再捏合拇指与食指。':'Left hand on the left, right hand on the right. Open your left hand, then pinch thumb and index.',
+ '左手和弦库':'Left hand · Chord bank',
+ '待触发':'Selected',
+ '和弦库':'Chord bank',
+ '和弦':'Chord',
+ '选中后捏合触发；也可点击卡片试听。':'Pinch to play the selection, or click a card to audition.',
+ '淡出和弦':'Fade out chord',
+ '触发和弦':'Chords played',
+ '正在播放':'Now playing',
+ '播放中':'Playing',
+ '右手音量':'Right hand · Volume',
+ '右手滤波':'Right hand · Filter',
+ '和弦总音量':'Chord master volume',
+ '触发间隔':'Retrigger interval',
+ '和弦发声':'Chord audio',
+ '左手在左区横向选择和弦，拇指与食指捏合触发一次；松开后可以再次触发。捏住时移动只切换选择。':'Move your left hand across the left zone to select a chord. Pinch thumb and index once to play. Release before the next trigger. Moving while pinched changes only the selection.',
+ '右手在右区上下调节音量，左右调节滤波亮度。两只手保持分开，中间缓冲区暂停更新控制。':'Move your right hand vertically for volume and horizontally for filter brightness. Keep hands apart. The center buffer suspends control updates.',
+ '手进入后会锁定所属操作区。两手交叉或遮挡时暂停触发；右手离开后，声音平滑降低。':'Each hand is assigned to its starting zone. Crossing or overlapping pauses triggers. When the right hand leaves, the sound fades down.',
+ '七个和弦使用原始录音与编号，每次弹奏自然衰减，切换时淡化衔接。':'Seven original chord recordings retain their numbers. Each note decays naturally, with a crossfade when changing chords.',
+ '等待双手进入各自操作区…':'Waiting for each hand in its zone…',
+ '已开启 · 左手横向选和弦，捏合触发；右手控制音量与滤波。':'Ready · Left hand selects and pinches to play. Right hand controls volume and filter.',
+ '双手过近或重叠 · 请分开双手':'Hands overlap or are too close · Keep them apart',
+ '左手 · 已捏合':'Left · Pinched',
+ '左手 · 可捏合触发':'Left · Ready to pinch',
+ '左手 · 请先张开':'Left · Open before pinching',
+ '左手 · 等待进入左区':'Left · Waiting in the left zone',
+ '右手 · 控制中':'Right · Controlling',
+ '右手 · 等待进入右区':'Right · Waiting in the right zone',
+ '左手 · 和弦':'Left · Chord',
+ '右手 · 音量 / 滤波':'Right · Volume / filter',
+ '和弦素材载入失败，请重试。':'Chord samples could not load. Please try again.'
+});
+
+Object.assign(dictionary,{
+ '已选':'Selected','演奏中':'Playing','最多识别双手':'Two hands · Independent zones',
+ '右手滤波 · 闷 → 亮':'Right filter · Dark → Bright',
+ '捏合触发选中和弦；点击画面卡片以100%音量试听。':'Pinch to play. Click an on-screen chord to audition at 100% volume.',
+ '手进入后会锁定所属操作区。两手交叉或遮挡时暂停触发；右手离开后，音量平滑回到50%。':'Hands stay assigned to their starting zone. Crossing or overlapping pauses triggers. When the right hand leaves, volume returns smoothly to 50%.',
+ '右手在右区上下调节音量，左右调节双重低通滤波，从低沉闷厚到明亮通透。两只手保持分开，中间缓冲区暂停更新控制。':'Move your right hand vertically for volume and horizontally for a stronger two-stage low-pass filter, from dark to bright. Keep hands apart; the center buffer suspends control updates.'
+});
+Object.assign(dictionary,{'捏合触发选中和弦；点击下方卡片以100%音量试听。':'Pinch to play. Click a chord below to audition at 100% volume.'});
+Object.assign(dictionary,{'最多保留两个和弦自然衰减，触发第三个时最早的淡出。重复触发同一和弦会重新弹奏。青色卡片表示正在发声，右手统一控制手势演奏声部。':'Keep up to two naturally decaying chords. A third fades out the oldest. Repeating a chord plays it again. Cyan cards show sounding chords; the right hand controls both gesture-played voices.'});
 let locale='en';try{locale=localStorage.getItem('motionScoreLanguage')||'en';}catch{}if(!['en','zh-CN','zh-TW'].includes(locale))locale='en';
 const records=new WeakMap(),attributes=new WeakMap(),keys=Object.keys(dictionary).sort((a,b)=>b.length-a.length);
 function translate(source){if(locale==='zh-CN')return source;if(locale==='zh-TW')return source.replace(/[\u4e00-\u9fff]/g,c=>traditional[c]||c);

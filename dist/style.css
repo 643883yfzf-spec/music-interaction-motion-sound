@@ -15,3 +15,72 @@
 .stage{margin-left:auto;margin-right:auto;width:min(calc(100% - 24px),calc(68vh * var(--video-ratio,1.7946)),calc(520px * var(--video-ratio,1.7946)));max-height:none}
 
 @media(max-width:620px){.sample-tabs{padding:9px;gap:6px}.stage{max-width:calc(100% - 12px)}}
+
+/* Half-size display for the fireworks and ocean samples; keep overlay aligned. */
+.stage.half-size{width:min(calc(50% - 12px),calc(34vh * var(--video-ratio,1.7946)),calc(260px * var(--video-ratio,1.7946)))}
+
+/* Camera chord performance. */
+.camera-stage{max-height:none;width:min(calc(100% - 28px),calc(48vh * 4 / 3),573px);margin-left:auto;margin-right:auto}
+.remix-zones{position:absolute;inset:0;display:flex;pointer-events:none}
+.remix-left,.remix-right{width:46%;position:relative;border-top:2px solid #d2fa8580;background:linear-gradient(#d2fa850d,transparent 30%)}
+.remix-right{border-color:#83dfdc80;background:linear-gradient(#83dfdc0d,transparent 30%)}
+.remix-zones b{display:block;color:var(--accent);font-size:12px;margin:52px 12px 5px}
+.remix-zones span{color:#c3d1bd;font-size:9px;margin:0 12px;display:block;line-height:1.5}
+.remix-right b{color:#83dfdc}
+.remix-gap{width:8%;background:repeating-linear-gradient(135deg,#ffffff05 0 5px,transparent 5px 10px);border-left:1px dashed #82917d55;border-right:1px dashed #82917d55}
+#chordZoneTicks{position:absolute;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(7,1fr);height:32px}
+#chordZoneTicks span{margin:0;text-align:center;padding-top:8px;border-right:1px solid #d2fa8533;font:11px monospace}
+#chordZoneTicks span.chosen{background:#d2fa8538;color:#e5ffb9;border-top:2px solid var(--accent)}
+.chord-deck{margin:0 14px 18px;padding-top:2px}
+.chord-deck-heading{display:flex;justify-content:space-between;color:#dce6d3;font-size:12px;margin-bottom:10px}
+#chordSelection{color:var(--accent);font-size:11px}
+.chord-cards{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}
+.chord-card{min-height:83px;text-align:left;padding:10px 8px;background:#111912;border-color:#384632;position:relative;transition:background .15s,border-color .15s}
+.chord-card span{display:block;font-size:12px;font-weight:600}
+.chord-card small{display:block;color:#80917e;font:10px monospace;margin-top:7px}
+.chord-card em{display:block;font-style:normal;font-size:9px;margin-top:9px;color:var(--accent);min-height:12px}
+.chord-card.chosen{border-color:var(--accent);background:#24321d}
+.chord-card.playing{box-shadow:inset 0 -3px #83dfdc;background:#18302a}
+.chord-card.playing em{color:#83dfdc}
+.chord-deck-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;color:var(--muted);font-size:10px}
+.chord-deck-foot button{padding:6px 10px;color:#83dfdc}
+.remix-readout{display:grid;grid-template-columns:1fr auto;gap:10px;margin:22px 0;font-size:11px;color:var(--muted)}
+.remix-readout b{color:#83dfdc;font:12px monospace}
+.remix-meter{grid-column:1/-1;height:5px;background:#29372b;border-radius:4px;overflow:hidden}
+.remix-meter i{display:block;width:65%;height:100%;border-radius:0;background:#83dfdc;transition:width .1s;margin:0}
+#remixFilterMeter{width:70%}
+#cameraHandList{display:block;line-height:1.8;min-height:30px}
+#cameraPlaceholder{z-index:2;background:#06110c99;font-size:19px}
+.camera-metrics{grid-template-columns:.85fr .85fr 1.3fr}
+@media(max-width:900px){.camera-stage{max-height:none}.chord-card span{font-size:11px}}
+@media(max-width:620px){.chord-deck{margin:0 8px 14px}.chord-cards{gap:4px;grid-template-columns:repeat(4,minmax(0,1fr))}.chord-card{min-height:73px}.remix-zones b{font-size:10px;margin:42px 6px 5px}.remix-zones span{font-size:8px;margin:0 6px}.chord-deck-heading{font-size:11px}#chordSelection{font-size:10px}.chord-deck-foot{align-items:flex-start}.camera-stage{max-height:none}}
+
+/* The seven on-screen lanes use the same 4%–44% range as the gesture selector. */
+.camera-stage .chord-cards{position:absolute;z-index:4;left:4%;width:40%;top:100px;bottom:38px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;pointer-events:auto}
+.camera-stage .chord-card{min-width:0;min-height:0;padding:9px 1px 6px;border-radius:4px;background:#17241833;border:1px solid #d2fa8538;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;color:#e6f3d5;box-shadow:none}
+.camera-stage .chord-card span{font:600 17px monospace;text-shadow:0 1px 4px #000}
+.camera-stage .chord-card small{font-size:9px;color:#d0dfc6;margin-top:4px;text-shadow:0 1px 4px #000}
+.camera-stage .chord-card em{font-size:8px;line-height:1.4;min-height:24px;word-break:break-all;margin-top:7px}
+.camera-stage .chord-card.chosen{border:2px solid #d2fa85;background:#b8f86c25;color:#efffd8}
+.camera-stage .chord-card.playing{border:2px solid #9bfff0;background:#4be0bf55;box-shadow:0 0 16px #83dfdc65,inset 0 0 18px #83dfdc40;color:#fff}
+.camera-stage .chord-card.playing span{font-size:21px;color:#fff}
+.camera-stage .chord-card.playing em{color:#fff;font-weight:700}
+.camera-stage .chord-card:focus-visible{outline:2px solid white;outline-offset:1px}
+#cameraPlaceholder{pointer-events:none}
+.remix-meter #remixVolumeMeter{width:50%}
+@media(max-width:620px){.camera-stage .chord-cards{top:80px;bottom:12px;gap:1px}.camera-stage .chord-card{padding:5px 0 2px}.camera-stage .chord-card span{font-size:13px}.camera-stage .chord-card small{font-size:8px}.camera-stage .chord-card em{font-size:7px;min-height:20px}.camera-stage .chord-card.playing span{font-size:16px}}
+
+#cameraPlaceholder{left:54%;font-size:16px;padding:16px;background:#06110c70}
+#cameraPlaceholder small{font-size:10px;line-height:1.8}
+.camera-stage .chord-card em{min-height:16px;font-size:10px;word-break:normal}
+@media(max-width:620px){#cameraPlaceholder{font-size:12px;padding:8px}#cameraPlaceholder small{font-size:8px}.camera-stage .chord-card em{min-height:13px;font-size:8px}}
+
+/* Chord bank below the camera, with separate selection and playback states. */
+.chord-deck .chord-cards{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;margin:12px 0}
+.chord-deck .chord-card{min-height:91px;padding:12px 8px;background:#111912;border:1px solid #384632;box-shadow:none}
+.chord-deck .chord-card.chosen{border:2px solid #d2fa85;background:#26351d}
+.chord-deck .chord-card.playing{border:2px solid #a6fff0;background:#235446;box-shadow:0 0 15px #83dfdc40,inset 0 -4px #83dfdc}
+.chord-deck .chord-card.playing span,.chord-deck .chord-card.playing em{color:#e2fff8}
+.chord-deck .chord-card.playing em{font-weight:700}
+#cameraPlaceholder{left:0}
+@media(max-width:620px){.chord-deck .chord-cards{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.chord-deck .chord-card{min-height:80px;padding:9px 6px}}
